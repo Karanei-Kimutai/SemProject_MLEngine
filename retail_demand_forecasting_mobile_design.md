@@ -16,6 +16,8 @@
 > - replays, the as-of date and method choice, model-version choice, and the research summary and export are only on `research`;
 > - it adds an intro tour, a getting-started checklist, "?" explanations and a built-in sample sales file.
 >
+> **Team management removed (23 November 2026).** At the project owner's request, inviting and removing users, role changes, pending invitations and the team screen were removed from the app's `main` and from the backend. Each workspace belongs to the account that created it, which is its owner. The roles below still exist in the data model, but nothing in the app assigns Manager or Viewer. Team items in this spec (§3.1, §5, §6.1, §8.2, §8.12) are marked as removed.
+>
 > Where this spec and `SemProject_Backend/docs/api.md` differ, api.md is right about the API. The app's `docs/FEATURES.md` describes what was built.
 
 ---
@@ -122,7 +124,7 @@ The app uses a business workspace. A workspace contains one or more stores. A us
 ### 3.1 User roles
 
 **Owner / Administrator**
-Manages the workspace and stores, invites and removes users, manages products, uploads and confirms imports, requests own-data model training (§9.4), generates, views, exports and deletes forecasts, and manages settings.
+Manages the workspace and stores, invites and removes users (removed on 23 November 2026), manages products, uploads and confirms imports, requests own-data model training (§9.4), generates, views, exports and deletes forecasts, and manages settings.
 
 **Manager / Analyst**
 Views workspace data, manages products when permitted, uploads and validates data, generates and compares forecasts, uses replay mode, views history and exports permitted reports. Cannot transfer ownership or remove the owner.
@@ -245,7 +247,7 @@ After sign-in, the app shows a bottom navigation bar with four destinations:
 
 The top app bar shows the screen title, a **workspace/store chip** that always tells the user which workspace they are in (the Reference workspace is visibly marked "Demo data"), a contextual action, and the Options menu.
 
-History is reached from Forecasts and from a dashboard shortcut. Settings, team management and model information are reached from the Options menu.
+History is reached from Forecasts and from a dashboard shortcut. Settings, team management (removed on 23 November 2026) and model information are reached from the Options menu.
 
 ### 5.2 Fragment destination list
 
@@ -269,7 +271,7 @@ History is reached from Forecasts and from a dashboard shortcut. Settings, team 
 - `ForecastDetailFragment`: result, comparison, table, metrics, export.
 - `ForecastHistoryFragment`: search and filter previous runs.
 - `ModelInfoFragment`: the active model's card (§8.13) and own-data training status.
-- `TeamManagementFragment`: owners/administrators only.
+- `TeamManagementFragment`: owners/administrators only. (removed on 23 November 2026)
 - `SettingsFragment`: workspace, preferences, help, sign out.
 
 The navigation graph must preserve back-stack behaviour, must not duplicate a destination when a bottom item is reselected, and must survive process recreation.
@@ -289,7 +291,7 @@ The app visibly implements all three menu patterns.
 **Entries:**
 - Switch workspace/store
 - About the forecasting model (opens `ModelInfoFragment`)
-- Manage team (authorised roles only)
+- Manage team (authorised roles only) (removed on 23 November 2026)
 - Settings
 - Help and support
 - About this application
@@ -385,7 +387,7 @@ Application mark and name on a theme background, using the AndroidX SplashScreen
 
 **Login:** email and password, show/hide password, Sign In button, loading state, inline validation, useful errors, password reset if the backend supports it.
 
-**Registration:** only if the backend allows self-registration; otherwise an invitation-acceptance path.
+**Registration:** only if the backend allows self-registration; otherwise an invitation-acceptance path. (Self-registration is used; invitations were removed on 23 November 2026.)
 
 **Session:** No hardcoded or plain-text tokens. Store them in secure storage backed by Android Keystore. On refresh failure, return to login with a clear message.
 
@@ -571,7 +573,7 @@ A searchable, filterable list of runs: product, store, as-of date, horizon, meth
 
 ### 8.12 Settings and team management
 
-Settings: profile, workspace, selected store, timezone, currency, theme, notifications (later), help, privacy, app version, sign out. Team management is limited to owners/administrators: invite, assign role, revoke, and pending invitations.
+Settings: profile, workspace, selected store, timezone, currency, theme, notifications (later), help, privacy, app version, sign out. Team management is limited to owners/administrators: invite, assign role, revoke, and pending invitations. **Team management was removed on 23 November 2026.**
 
 ### 8.13 Model information screen
 
