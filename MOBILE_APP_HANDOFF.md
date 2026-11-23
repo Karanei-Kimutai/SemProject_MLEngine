@@ -4,7 +4,7 @@
 **From:** the model and backend work (finished 7 November 2026).
 **Your job:** build the Android app described in [`retail_demand_forecasting_mobile_design.md`](retail_demand_forecasting_mobile_design.md) (the spec), on top of the **finished backend API**. Everything server-side exists and is tested. You don't need to build, mock or change the backend or the model.
 
-> **Status, 9 November 2026: the app is built.** This file is kept as the brief the app was built from. Since then, the app's `main` became a version for retail business owners: the demo store is called the **sample shop**, the Forecasts tab forecasts every product at once (backend store-wide batches, approved by the project owner), results lead with one number, and replays, model-version choice and the research summary moved to the app's `research` branch. It also gained an intro tour, a getting-started checklist and a built-in sample sales file. For the current state read the app repository's `README.md`, `SETUP.md`, `docs/FEATURES.md` and `docs/HOW_FORECASTING_WORKS.md`. The rules in §2, §9 and §11 still apply.
+> **Status, 9 November 2026: the app is built.** This file is kept as the brief the app was built from. Since then, the app's `main` became a version for retail business owners: the demo store is called the **sample shop**, the Forecasts tab forecasts every product at once (backend store-wide batches, approved by the project owner), results lead with one number, and replays, model-version choice and the research summary moved to the app's `research` branch. It also gained an intro tour, a getting-started checklist and a built-in sample sales file. On 23 November 2026, at the project owner's request, team management and invitations were removed from the app and the backend, so each workspace belongs to the account that created it; the team items below (build step 5, the Team row in §6, demo script 6) are kept only as history. For the current state read the app repository's `README.md`, `SETUP.md`, `docs/FEATURES.md` and `docs/HOW_FORECASTING_WORKS.md`. The rules in §2, §9 and §11 still apply.
 
 Read this file first, then the spec, then [`SemProject_Backend/docs/api.md`](../SemProject_Backend/docs/api.md). Where they disagree, api.md is right about the API, and this file is right about everything else. Ignore any spec text about building `mlengine` or the ML service (for example in §21); that work is done.
 
@@ -16,7 +16,7 @@ Read this file first, then the spec, then [`SemProject_Backend/docs/api.md`](../
 | --- | --- | --- |
 | Model research (notebooks) | this repo (`SemProject_MLEngine`), `notebooks/` | Done |
 | ML engine + internal ML service | this repo, `mlengine/`, `models/` | Done, tested. **Not for the app to call** |
-| **Backend API** (what the app calls) | `../SemProject_Backend` ([GitHub](https://github.com/Karanei-Kimutai/SemProject_Backend)) | **Done**: auth, workspaces, stores, products, history, readiness, capabilities, model cards, forecast jobs, store-wide forecast batches, CSV imports, own-data training, team, password reset, research export. 67 tests; checked end to end in Docker |
+| **Backend API** (what the app calls) | `../SemProject_Backend` ([GitHub](https://github.com/Karanei-Kimutai/SemProject_Backend)) | **Done**: auth, workspaces, stores, products, history, readiness, capabilities, model cards, forecast jobs, store-wide forecast batches, CSV imports, own-data training, password reset, research export (team management and invitations were removed on 23 November 2026). 64 tests; checked end to end in Docker |
 | Demo data | Seeded into the backend from `python -m mlengine export-reference` | Done |
 | Sample business data | `python -m mlengine export-samples` → `data/processed/samples/` | Done |
 | **Android app** | `VolatileDemandForecastingMobileApplication` | **Built.** `main`: the business version; `research`: the research version described in this handoff |
@@ -84,18 +84,18 @@ echo "a-long-password-1" | docker compose -f docker-compose.yml -f docker-compos
 ```
 
 - **Base URL:** from the Android emulator, use `http://10.0.2.2:8000`. On a phone on the same Wi-Fi, use your machine's LAN IP and allow cleartext for debug builds only.
-- **Email** (password reset codes, invitations): locally, messages only appear in `docker compose logs api`.
+- **Email** (password reset codes): locally, messages only appear in `docker compose logs api`.
 - **Research mode:** the user created above has `isResearch: true`. That unlocks research dates, model-version choice and `/v1/research/*` (used by the app's `research` branch; `main` doesn't need a research user).
 - **Fresh sample data:** re-run `export-samples` before a demo, so the sample history ends yesterday.
 - **Starting over:** `docker compose ... down` keeps the data; adding `-v` wipes it.
 
 ## 4. The contract
 
-- **[`SemProject_Backend/docs/api.md`](../SemProject_Backend/docs/api.md)** is the guide to every endpoint, field, error code and flow (auth refresh, polling, imports, training, team).
+- **[`SemProject_Backend/docs/api.md`](../SemProject_Backend/docs/api.md)** is the guide to every endpoint, field, error code and flow (auth refresh, polling, imports, training).
 - **[`SemProject_Backend/docs/openapi.json`](../SemProject_Backend/docs/openapi.json)** is the machine-readable contract. Generate the DTOs and Retrofit service from it, or check hand-written DTOs against it. A backend test keeps it current.
 - **Where api.md and spec §12.1 differ, api.md is right.** The differences:
   - IDs are UUIDs, and a product has a separate `sku`.
-  - It adds `/v1/auth/register`, password reset and change, job retry, forecast delete, the history summary, eligibility, training runs, members and invitations, and the research summary.
+  - It adds `/v1/auth/register`, password reset and change, job retry, forecast delete, the history summary, eligibility, training runs and the research summary. (It also had members and invitations until they were removed on 23 November 2026.)
   - `points[]` use `baseline` and `seasonalNaive`.
   - The training run is its own resource (`/v1/training-runs/{id}`).
 - **Errors** always have the shape `{"error": {"code", "message", "details", "requestId"}}`. Map `code` to string resources, and fall back to `message`, which is already plain language.
@@ -106,7 +106,7 @@ echo "a-long-password-1" | docker compose -f docker-compose.yml -f docker-compos
 2. **Auth:** register, login, refresh in an OkHttp `Authenticator`, logout, and forgot password. Tokens go in Keystore-backed storage (§14).
 3. **Demo journey:** workspace picker → dashboard → products → forecast configuration → job progress → results (chart, table, three kinds of evidence) → history → model info. This is the core of the research demo.
 4. **Business journey:** create workspace and store → CSV import wizard (7 steps, §8.6) → readiness → baseline forecasts → eligibility progress → train → AI forecasts.
-5. **Team and settings:** members, invitations (owner) and "My invitations" (everyone), plus profile and change password.
+5. **Team and settings:** members, invitations (owner) and "My invitations" (everyone), plus profile and change password. The team parts were removed on 23 November 2026.
 6. **Research:** summary screen and CSV export (research users only).
 7. **Offline and cache:** Room for products, imports and completed forecasts (§13).
 8. **Tests and acceptance:** spec §19.
@@ -130,7 +130,6 @@ Build and test after each step. Commit as you go.
 | Export | `GET /v1/forecasts/{id}/export?format=csv` | Save through SAF |
 | Data screen + import wizard (§8.6) | `POST …/imports` (multipart, `Idempotency-Key`), `PUT /v1/imports/{iid}/mapping`, `GET …/validation`, `GET …/errors`, `POST …/confirm`, `DELETE`, `GET …/imports` | `detected.suggestedMapping` (highlight `confidence: "CHECK"`), `dateFormatAmbiguous`; the required **"no row means zero sales?"** question → `missingDaysAreZero`; `summary.*`; `overlappingDays` → SKIP/REPLACE choice; `result.*` |
 | Model info (§8.13) | `GET …/models/active`, `GET …/models/eligibility`, `POST …/models/train`, `GET /v1/training-runs/{id}`, `GET …/models/training-runs` | Eligibility `checks.*.value / required` ("64 of 120 days"); run `outcome` (`TRAINED` / `GATE_FAILED` / `NOT_ELIGIBLE`), `backtest`, `horizonAccuracy` |
-| Team (§8.12) | `…/members`, `…/invitations`, `GET /v1/me/invitations`, `POST /v1/invitations/{id}/accept`, `…/decline` | Owners manage; check `/v1/me/invitations` after sign-in and badge it |
 | Auth extras (§8.2) | `POST /v1/auth/password-reset/request`, `…/confirm`, `POST /v1/auth/change-password` | 8-digit code; on `429 RATE_LIMITED` show `Retry-After` |
 | Research (research users) | `GET /v1/research/summary`, `GET /v1/research/export` | `overall`, `byDemandClass`, `byDayAhead` for AI vs both baselines; always show the `note` |
 
@@ -166,7 +165,7 @@ Scripts 1 and 2 need the app's `research` branch (as-of dates and Compare). For 
    - Eligibility should pass; tap Train. In about 25 s the outcome is `TRAINED` with horizons `[1, 7]`, and the app now offers AI forecasts.
 4. **Business not ready yet:** import `sample_shop_small.csv` (answer "No"). Expect "60 of 120 days", Train refused with `NOT_ELIGIBLE`, and baseline forecasts working.
 5. **Messy import:** upload `sample_shop_messy.csv`. Expect a semicolon file with names only and an ambiguous date format, so choose `DD/MM/YYYY`. The report shows 5 rejected rows with line numbers, plus warnings.
-6. **Team:** invite a second email as Viewer, register that user, accept from "My invitations". Expect read-only access: no Generate, no Upload.
+6. **Team:** no longer applies; team management and invitations were removed on 23 November 2026.
 7. **Password reset:** request a code, read it from `docker compose logs api`, reset.
 
 `data/processed/samples/README.md` lists the wizard answers for each file.
@@ -182,7 +181,7 @@ Scripts 1 and 2 need the app's `research` branch (as-of dates and Compare). For 
 - **Refresh tokens rotate, and reuse signs the user out everywhere.** Serialise refreshes (one `Authenticator`, with a mutex), and replace both tokens every time.
 - **Polling:** forecasts every 1 s for 10 s, then every 3 s, up to 2 min (§8.9); training every 2–3 s. The user can leave; jobs continue on the server.
 - **Imports are synchronous.** Validation and confirm return when they're done (a few seconds for 10 MB), so show progress during the request. Send one `Idempotency-Key` per user action, and reuse it on retry.
-- **The demo workspace is read-only.** Hide Upload, Train, product editing and Team there, and show "Try replay" instead of Upload (spec §8.4).
+- **The demo workspace is read-only.** Hide Upload, Train and product editing there, and show "Try replay" instead of Upload (spec §8.4).
 
 ## 10. Files
 
