@@ -111,7 +111,9 @@ Each notebook ends with its own detailed conclusions section.
 
 ### Stage 8: From notebooks to a served model (`mlengine`)
 
-The full engineering story is in [`docs/notebook-to-production.md`](docs/notebook-to-production.md). In short: the Stage 3 pipeline is now an importable package, [`mlengine/`](mlengine/), with one feature implementation shared by training and serving. It runs behind an internal HTTP service for the mobile app's backend ([design spec](retail_demand_forecasting_mobile_design.md), [handoff](MOBILE_APP_HANDOFF.md)).
+The full engineering story is in [`docs/notebook-to-production.md`](docs/notebook-to-production.md). In short: the Stage 3 pipeline is now an importable package, [`mlengine/`](mlengine/), with one feature implementation shared by training and serving. It runs behind an internal HTTP service for the mobile app's backend (`SemProject_Backend`).
+
+The final engine logic is reproduced and evaluated end to end in [`LightGBM_Final.ipynb`](LightGBM_Final.ipynb), with parity checks against `mlengine` and the registered models.
 
 - **Parity with the notebook:** features are identical to `LightGBM_BaseLocal.ipynb` over all 2,759,040 rows, and training reproduces 70 trees, dev RMSE 2.356 and backtest RMSE 2.377. The HTTP service reproduces the backtest end to end.
 - **Released model** `m5-ca1-foods@1.1.0` (plus `-dev` and `-bt` versions for leakage-safe replays), committed under [`models/`](models/).
@@ -128,6 +130,7 @@ The full engineering story is in [`docs/notebook-to-production.md`](docs/noteboo
 
 | File or folder | Purpose |
 | --- | --- |
+| [`LightGBM_Final.ipynb`](LightGBM_Final.ipynb) | **Final submission notebook:** the final engine (Tweedie LightGBM) reproduced end to end, covering features, training, backtests, the 7-day horizon, inference safeguards and per-business retraining, with parity checks against `mlengine`. A copy is in [`notebooks/`](notebooks/LightGBM_Final.ipynb). |
 | [`notebooks/LightGBM_BaseLocal.ipynb`](notebooks/LightGBM_BaseLocal.ipynb) | Local EDA plus the main CA_1/FOODS model: short-horizon lags, Tweedie LightGBM, naive lag-1 baseline, and optional Ridge and Random Forest comparisons. Reads data from `data/raw/`. |
 | [`notebooks/LightGBM_BaseColab.ipynb`](notebooks/LightGBM_BaseColab.ipynb) | Colab version of the same workflow. Mounts Google Drive for the data. |
 | [`notebooks/HurdleModel_CA1Foods.ipynb`](notebooks/HurdleModel_CA1Foods.ipynb) | Two-stage hurdle model (classify sale vs. no sale, regress the non-zero magnitude), compared against the single model. |
@@ -140,7 +143,6 @@ The full engineering story is in [`docs/notebook-to-production.md`](docs/noteboo
 | [`models/`](models/) | Released model artifacts (`m5-ca1-foods` 1.1.0, 1.1.0-bt, 1.1.0-dev). |
 | [`tests/`](tests/) | Parity, leakage, model and service tests (`pytest`). |
 | [`docs/`](docs/README.md) | Notebook-to-production journey, `mlengine` architecture, ML service API, model card, operations runbook, API examples. |
-| [`retail_demand_forecasting_mobile_design.md`](retail_demand_forecasting_mobile_design.md), [`MOBILE_APP_HANDOFF.md`](MOBILE_APP_HANDOFF.md) | Mobile app design spec and the handoff for the Android app build (the backend is in `SemProject_Backend`). |
 | [`scripts/make_parity_fixture.py`](scripts/make_parity_fixture.py) | Re-runs the notebook's cells and checks that `mlengine` builds identical features. |
 | [`scripts/preprocess_m5.py`](scripts/preprocess_m5.py) | **Legacy** batch feature preparation with 28-day lags (see the note below). Not used by `mlengine`. |
 | [`requirements.txt`](requirements.txt) | Python dependencies for the notebooks and preprocessing script. |

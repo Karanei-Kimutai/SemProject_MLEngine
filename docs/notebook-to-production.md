@@ -87,7 +87,7 @@ The simplest model that matched the best result won. Fewer features also means l
 
 ## 4. Making the app design fit the model
 
-Before writing any code, the draft mobile app design (v1.0) was checked against what the model actually does. Ten mismatches were found and fixed in the spec, which became v2.0 ([`retail_demand_forecasting_mobile_design.md`](../retail_demand_forecasting_mobile_design.md) §0). The ones that shaped the engineering:
+Before writing any code, the draft mobile app design (v1.0) was checked against what the model actually does. Ten mismatches were found and fixed in the spec, which became v2.0. The ones that shaped the engineering:
 
 1. **Horizon.** The draft offered 7/14/30 days, but the model is next-day only. Multi-day forecasts were therefore designed as recursive and gated behind a validation experiment (§9.1 below).
 2. **Whose data.** The draft let any business forecast its own uploads with the M5-trained model, which is invalid. Two modes were introduced:
